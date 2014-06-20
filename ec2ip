@@ -1,0 +1,30 @@
+#! /bin/bash -e
+# work out the private ip address for an aws instance using jq and aws cli
+metadata=''
+instanceid=''
+base64=''
+
+options='bm:i:'
+
+while getopts $options option
+do
+  case $option in
+    m ) metadata=$OPTARG;;
+    i ) instanceid=$OPTARG;;
+    b ) base64='YES';;
+    * ) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
+  esac
+done
+
+if [ -z "$metadata" ]
+then
+  metadata=$(ec2instancemetadata -b -i $instanceid)
+  base64='YES'
+fi
+
+if [ -n "$base64"  ]
+then
+  echo  $metadata | base64 -D  | jq -r '.PrivateIpAddress'
+else
+  echo  $metadata   | jq -r '.PrivateIpAddress'
+fi

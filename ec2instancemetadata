@@ -1,0 +1,19 @@
+#! /bin/bash -e
+# ec2instancemetadata : retrieve json metadata for instance using aws cli
+instanceid=''
+base64=''
+options='bi:'
+while getopts $options option
+do
+  case $option in
+    i ) instanceid=$OPTARG;;
+    b ) base64='YES';;
+    * ) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
+  esac
+done
+if [ -n "$base64" ]
+then
+  echo $(aws ec2 describe-instances --instance-ids $instanceid)  | jq -c '.Reservations[0].Instances[0]' | base64
+else
+  echo $(aws ec2 describe-instances --instance-ids $instanceid)  | jq -c '.Reservations[0].Instances[0]'
+fi
