@@ -4,13 +4,14 @@ metadata=''
 instanceid=''
 base64=''
 
-options='bm:i:'
+options='pbm:i:'
 
 while getopts $options option
 do
   case $option in
     m ) metadata=$OPTARG;;
     i ) instanceid=$OPTARG;;
+    p ) public='YES';;
     b ) base64='YES';;
     * ) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
   esac
@@ -22,9 +23,18 @@ then
   base64='YES'
 fi
 
+interface=''
+
+if [ -n "$public" ]
+then
+  interface='PublicIpAddress'
+else
+  interface='PrivateIpAddress'
+fi
+
 if [ -n "$base64"  ]
 then
-  echo  $metadata | base64 -D  | jq -r '.PrivateIpAddress'
+  echo  $metadata | base64 -D  | jq -r ".$interface"
 else
-  echo  $metadata   | jq -r '.PrivateIpAddress'
+  echo  $metadata   | jq -r ".$interface"
 fi
