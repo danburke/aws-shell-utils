@@ -1,0 +1,14 @@
+#! /bin/bash -e
+# ec2elbinstances : retrieve instance ids for instances attached to an elb
+elb=''
+options='ce:'
+while getopts $options option
+do
+  case $option in
+    e ) elb=$OPTARG;;
+    c ) csv='|@csv';;
+    * ) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
+  esac
+done
+
+aws elb describe-load-balancers --load-balancer-names $elb  |  jq -r "[.LoadBalancerDescriptions[].Instances[].InstanceId] $csv"
