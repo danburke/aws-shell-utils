@@ -1,22 +1,23 @@
 #! /bin/bash -e
 # initiate an ssh session to an instance, assumes that you have SSH keys in your ~/.ssh directory as <keyname>.pem
 
-options='i:'
+options='pi:'
 
 while getopts $options option
 do
   case $option in
-    i ) instanceid=$OPTARG;;
+    i ) instanceids=$OPTARG;;
+    p ) public=' -p ';;
     * ) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
   esac
 done
 
-if [ -n $metadata ]
-then
-  metadata=$(ec2instancemetadata -i $instanceid -b)
-fi
+
+source ec2selectinstance $instanceids
+metadata=$(ec2instancemetadata -i $instanceid -b)
 
 key=$( echo $metadata | base64 -D  | jq -r '.KeyName')
-ip=$(ec2ip -b -m $metadata )
-echo "Sshing in to $ip using $key"
+ip=$(ec2ip -b -m $metadata $public)
+
+echo "SSHing in to $ip using $key"
 ssh -l ec2-user -i ~/.ssh/$key.pem $ip
