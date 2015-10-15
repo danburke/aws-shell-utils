@@ -1,0 +1,14 @@
+#! /bin/bash -e
+# ec2elbinstances : retrieve instance ids for instances attached to an elb
+asg=''
+options='ca:'
+while getopts $options option
+do
+  case $option in
+    a ) asg=$OPTARG;;
+    c ) csv='|@csv';;
+    * ) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
+  esac
+done
+
+aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names $asg  |  jq -r "[.AutoScalingGroups[].Instances[].InstanceId]$csv"
