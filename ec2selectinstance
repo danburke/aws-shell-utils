@@ -1,0 +1,18 @@
+#! /bin/bash -e
+
+instanceids="$*"
+instanceids=$(echo $instanceids | tr -d '"')
+IFS=',' read -a instanceids <<< "$instanceids"
+if [ "${#instanceids[*]}" -gt 1 ]; then
+  echo "Instances available:"
+  for (( i=0; i<=$(( ${#instanceids[*]} -1 )); i++ ))
+  do
+      echo  "$i) $(ec2instancemetadata -i ${instanceids[$i]} -s)"
+  done
+  echo "Please Select an Instance:"
+  read n
+else
+  n=0
+fi
+echo "Selected: $(ec2instancemetadata -i ${instanceids[n]} -s)"
+instanceid=${instanceids[n]}
